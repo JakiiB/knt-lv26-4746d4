@@ -1,0 +1,25 @@
+{
+  "name": "re:Invent '26 Prod Companion",
+  "short_name": "re:Invent '26",
+  "description": "Offline-first Vegas production run sheet, Strip transit times, contacts, flights, and gear guide for Jake Brown (Kineta).",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090d14",
+  "theme_color": "#090d14",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

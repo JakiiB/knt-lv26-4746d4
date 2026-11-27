@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#090d14" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="re:Invent '26">
+  <title>re:Invent '26 Prod Companion | Kineta</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="data.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-row">
+        <span class="brand-mark" aria-hidden="true">LV26</span>
+        <div class="clock-stack">
+          <div class="clock-vegas">
+            <span class="clock-label">VEGAS PST</span>
+            <time id="clock-pst" class="clock-value">--:--</time>
+            <span id="sim-pill" class="sim-pill" hidden>SIM</span>
+          </div>
+          <div class="clock-syd">
+            <span id="clock-syd">SYD --:--</span>
+            <span class="dot-sep" aria-hidden="true">&middot;</span>
+            <span id="sync-freshness" class="sync-freshness">Baked 27 Nov</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" id="sync-btn" class="hdr-btn hdr-btn-sync" title="Sync live Tides Google Sheet">
+        <span class="hdr-btn-label">Sync</span>
+      </button>
+      <button type="button" id="quick-edit-btn" class="hdr-btn" title="Quick-Edit Suite #s, Room #, Seats">
+        <span class="hdr-btn-label">Edit TBC</span>
+      </button>
+      <button type="button" id="theme-toggle-btn" class="hdr-btn" aria-label="Toggle light or dark theme" title="Toggle Light / Dark mode">
+        <span id="theme-btn-text" class="hdr-btn-label">Theme</span>
+      </button>
+      <button type="button" id="settings-btn" class="hdr-btn" aria-label="Open sync and preview settings" title="Settings & Time Simulator">
+        <span class="hdr-btn-label">Setup</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <nav class="primary-nav" aria-label="Primary">
+      <button type="button" class="nav-btn" data-view="now" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">&#9673;</span>
+        <span class="nav-text">Now</span>
+      </button>
+      <button type="button" class="nav-btn" data-view="schedule">
+        <span class="nav-icon" aria-hidden="true">&#9776;</span>
+        <span class="nav-text">Schedule</span>
+      </button>
+      <button type="button" class="nav-btn" data-view="map">
+        <span class="nav-icon" aria-hidden="true">&#9672;</span>
+        <span class="nav-text">Map</span>
+      </button>
+      <button type="button" class="nav-btn" data-view="contacts">
+        <span class="nav-icon" aria-hidden="true">&#9742;</span>
+        <span class="nav-text">Contacts</span>
+      </button>
+      <button type="button" class="nav-btn" data-view="logistics">
+        <span class="nav-icon" aria-hidden="true">&#9992;</span>
+        <span class="nav-text">Logistics</span>
+      </button>
+    </nav>
+
+    <main class="app-main" id="app-main">
+      <!-- VIEW 1: NOW -->
+      <section id="view-now" class="view-panel" aria-label="Command Deck">
+        <div id="now-content" class="view-stack"></div>
+      </section>
+
+      <!-- VIEW 2: SCHEDULE -->
+      <section id="view-schedule" class="view-panel" aria-label="Production Schedule" hidden>
+        <div class="schedule-sticky-controls">
+          <div
+            class="day-tablist scroller"
+            id="day-tablist"
+            focusgroup="tablist nomemory"
+            role="tablist"
+            aria-label="Production Days"
+          ></div>
+          <div class="filter-row" role="group" aria-label="Schedule crew filter">
+            <button type="button" class="filter-pill is-active" data-audience="jake" aria-pressed="true">Jake's Run Sheet</button>
+            <button type="button" class="filter-pill" data-audience="split" aria-pressed="false">Jake + Kalen Split</button>
+            <button type="button" class="filter-pill" data-audience="all" aria-pressed="false">All Key Events</button>
+          </div>
+        </div>
+        <div id="schedule-content" class="view-stack"></div>
+      </section>
+
+      <!-- VIEW 3: MAP -->
+      <section id="view-map" class="view-panel" aria-label="Strip Map and Transit Calculator" hidden>
+        <div id="map-content" class="view-stack"></div>
+      </section>
+
+      <!-- VIEW 4: CONTACTS -->
+      <section id="view-contacts" class="view-panel" aria-label="Contacts and Quick Links" hidden>
+        <div id="contacts-content" class="view-stack"></div>
+      </section>
+
+      <!-- VIEW 5: LOGISTICS -->
+      <section id="view-logistics" class="view-panel" aria-label="Travel, Hotel and Kit Logistics" hidden>
+        <div id="logistics-content" class="view-stack"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Quick-Edit TBC Dialog -->
+  <dialog id="quick-edit-dialog" closedby="any" aria-labelledby="qe-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h1 id="qe-title">Quick-Edit On-Site Details</h1>
+        <form method="dialog">
+          <button type="submit" value="close" class="dialog-close" aria-label="Close dialog">&times;</button>
+        </form>
+      </div>
+      <form id="quick-edit-form" class="dialog-form">
+        <p class="dialog-hint">Saved directly on this device for instant offline use across every tab.</p>
+
+        <label class="field-group">
+          <span>The Tides Production Office (Venetian)</span>
+          <input type="text" id="qe-prod-suite" placeholder="e.g. Venetian Suite 23-104">
+        </label>
+
+        <label class="field-group">
+          <span>APJC Content Studio (Venetian)</span>
+          <input type="text" id="qe-studio-suite" placeholder="e.g. Venetian Suite 23-108">
+        </label>
+
+        <label class="field-group">
+          <span>Hotel Room # (HGVC Flamingo #3107602606)</span>
+          <input type="text" id="qe-hotel-room" placeholder="e.g. Tower 2, Room 1408">
+        </label>
+
+        <label class="field-group">
+          <span>Sat 28 Nov Team Dinner Venue (6:00 PM)</span>
+          <input type="text" id="qe-sat-dinner" placeholder="e.g. Grand Lux Cafe, Venetian">
+        </label>
+
+        <div class="field-grid-2">
+          <label class="field-group">
+            <span>AA 7374 / QF11 Seat</span>
+            <input type="text" id="qe-seat-7374" placeholder="e.g. 54A">
+          </label>
+          <label class="field-group">
+            <span>AA 7374 Gate</span>
+            <input type="text" id="qe-gate-7374" placeholder="e.g. Gate 31">
+          </label>
+        </div>
+
+        <div class="field-grid-2">
+          <label class="field-group">
+            <span>AA 6425 (LAX->LAS) Seat</span>
+            <input type="text" id="qe-seat-6425" placeholder="e.g. 18F">
+          </label>
+          <label class="field-group">
+            <span>AA 6425 Gate</span>
+            <input type="text" id="qe-gate-6425" placeholder="e.g. T4 Gate 42B">
+          </label>
+        </div>
+
+        <div class="field-grid-2">
+          <label class="field-group">
+            <span>AA 421 (LAS->LAX) Seat</span>
+            <input type="text" id="qe-seat-421" placeholder="e.g. 21A">
+          </label>
+          <label class="field-group">
+            <span>AA 7387 / QF12 Seat</span>
+            <input type="text" id="qe-seat-7387" placeholder="e.g. 60K">
+          </label>
+        </div>
+
+        <label class="field-group">
+          <span>On-Site Field Notes</span>
+          <textarea id="qe-notes" rows="2" placeholder="Door codes, Wi-Fi passwords, Box upload priorities..."></textarea>
+        </label>
+
+        <div class="dialog-actions">
+          <button type="button" id="qe-reset-btn" class="btn-ghost">Reset Defaults</button>
+          <button type="submit" class="btn-primary">Save to Device</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Settings & Time-Travel Simulator Dialog -->
+  <dialog id="settings-dialog" closedby="any" aria-labelledby="settings-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h1 id="settings-title">Sync &amp; Preview Setup</h1>
+        <form method="dialog">
+          <button type="submit" value="close" class="dialog-close" aria-label="Close dialog">&times;</button>
+        </form>
+      </div>
+      <div class="dialog-form">
+        <div class="settings-block">
+          <h2>Vegas Clock Preview Simulator</h2>
+          <p class="dialog-hint">Test how the Now tab and Leave-By countdowns look at any Vegas moment before you fly.</p>
+          <div class="sim-preset-grid">
+            <button type="button" class="sim-preset-btn" data-sim="">Live Real Time</button>
+            <button type="button" class="sim-preset-btn" data-sim="2026-11-28T14:45">Sat 28 2:45 PM (Gear)</button>
+            <button type="button" class="sim-preset-btn" data-sim="2026-11-30T20:15">Mon 30 8:15 PM (Soleia)</button>
+            <button type="button" class="sim-preset-btn" data-sim="2026-12-01T14:05">Tue 1 2:05 PM (Casey)</button>
+            <button type="button" class="sim-preset-btn" data-sim="2026-12-02T18:40">Wed 2 6:40 PM (Crawl)</button>
+          </div>
+          <label class="field-group">
+            <span>Custom Vegas PST Date &amp; Time</span>
+            <input type="datetime-local" id="sim-custom-input" min="2026-11-27T00:00" max="2026-12-06T23:59">
+          </label>
+        </div>
+
+        <hr class="divider-line">
+
+        <div class="settings-block">
+          <h2>Live Tides Google Sheet Sync</h2>
+          <p class="dialog-hint">Baked-in snapshot is already live. To refresh straight from Megan's Sheet on the ground, paste your Apps Script Web App URL (under jake@kineta.com.au).</p>
+          <label class="field-group">
+            <span>Apps Script Web App URL (/exec)</span>
+            <input type="url" id="sync-url-input" placeholder="https://script.google.com/macros/s/.../exec">
+          </label>
+          <label class="field-group">
+            <span>Sync Token</span>
+            <input type="text" id="sync-token-input" autocomplete="off">
+          </label>
+          <div class="dialog-actions">
+            <button type="button" id="clear-sync-btn" class="btn-ghost">Clear Synced Cache</button>
+            <button type="button" id="save-sync-btn" class="btn-primary">Save &amp; Sync Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
